@@ -1,13 +1,15 @@
-import * as Nano from 'nano'
 import { asNumber, asObject, asOptional, asString } from 'cleaners'
+import * as Nano from 'nano'
 
 import { Base } from '.'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CONFIG = require('../../serverConfig.json')
 
 const nanoDb = Nano(CONFIG.dbFullpath)
 const dbDevices = nanoDb.db.use('db_devices')
 
-const IDevice = asObject({
+const asDevice = asObject({
   appId: asString,
   tokenId: asOptional(asString),
   deviceDescription: asString,
@@ -16,14 +18,14 @@ const IDevice = asObject({
   edgeBuildNumber: asNumber
 })
 
-export class Device extends Base implements ReturnType<typeof IDevice> {
+export class Device extends Base implements ReturnType<typeof asDevice> {
   public static table = dbDevices
-  public static asType = IDevice
+  public static asType = asDevice
 
-  public appId: string
-  public tokenId: string
-  public deviceDescription: string
-  public osType: string
-  public edgeVersion: string
-  public edgeBuildNumber: number
+  public appId!: string
+  public tokenId!: string
+  public deviceDescription!: string
+  public osType!: string
+  public edgeVersion!: string
+  public edgeBuildNumber!: number
 }
