@@ -2,17 +2,17 @@
   "name": "edge-push-notifications",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "main": "build/index.js",
   "scripts": {
+    "compile": "tsc",
     "script:price": "node build/index.js",
     "script:price:pm2": "pm2 start build/index.js --name price-script --log logs/price-script.log --time",
     "server": "node build/server.js",
-    "server:pm2": "pm2 start build/server.js --name server --log logs/server.log --time",
-    "compile": "tsc"
+    "server:pm2": "pm2 start build/server.js --name server --log logs/server.log --time"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
