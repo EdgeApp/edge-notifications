@@ -132,6 +132,7 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
   let price: number
   try {
     await sleep()
+    // @ts-expect-error
     price = await getPrice(currencyCode, 'USD')
   } catch {
     return response
@@ -150,6 +151,7 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
 
     let priceBefore
     try {
+      // @ts-expect-error
       priceBefore = await getPrice(currencyCode, 'USD', before)
     } catch {
       continue
@@ -157,6 +159,7 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
 
     const priceChange = parseFloat((100 * (price - priceBefore) / priceBefore).toFixed(2))
     const today = Date.parse(new Date().toISOString())
+    // @ts-expect-error
     const percent = HOURS_PERCENT_MAP[hours]
 
     const logData = {

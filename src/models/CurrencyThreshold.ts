@@ -22,9 +22,11 @@ export class CurrencyThreshold extends Base implements ReturnType<typeof ICurren
 
   public thresholds: ReturnType<typeof IThresholds>
 
+  // @ts-expect-error
   constructor(...args) {
     super(...args)
 
+    // @ts-expect-error
     if (!this.thresholds)
       this.thresholds = {}
   }

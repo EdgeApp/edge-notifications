@@ -20,10 +20,10 @@ export class Device extends Base implements ReturnType<typeof IDevice> {
   public static table = dbDevices
   public static asType = IDevice
 
-  public appId: string
-  public tokenId: string
-  public deviceDescription: string
-  public osType: string
-  public edgeVersion: string
-  public edgeBuildNumber: number
+  public appId!: string
+  public tokenId!: string
+  public deviceDescription!: string
+  public osType!: string
+  public edgeVersion!: string
+  public edgeBuildNumber!: number
 }
