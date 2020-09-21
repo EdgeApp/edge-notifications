@@ -1,8 +1,8 @@
 import * as schedule from 'node-schedule'
 
 import { CurrencyThreshold, Device, User } from './models'
-import { getPrice } from './prices'
 import { NotificationManager } from './NotificationManager'
+import { getPrice } from './prices'
 const CONFIG = require('../serverConfig.json')
 
 const HOURS_PERCENT_MAP = {
@@ -20,7 +20,7 @@ interface NotificationPriceChange {
   price: number
   priceChange: number
   timestamp: number
-  deviceTokens: Array<string>
+  deviceTokens: string[]
 }
 
 schedule.scheduleJob(`*/${CONFIG.priceCheckInMinutes} * * * *`, run)
@@ -38,9 +38,11 @@ async function run() {
 run()
 
 async function checkPriceChanges() {
-  const users = await User.where({selector: {
-    notifications: { enabled: true }
-  }}) as Array<User>
+  const users = await User.where({
+    selector: {
+      notifications: { enabled: true }
+    }
+  })
 
   const priceMap: NotificationPriceMap = {}
 
@@ -49,12 +51,14 @@ async function checkPriceChanges() {
       let map = priceMap[currencyCode]
       if (!map) {
         try {
-          let currencyThreshold = await CurrencyThreshold.fetch(currencyCode) as CurrencyThreshold
+          let currencyThreshold = await CurrencyThreshold.fetch(currencyCode)
           if (!currencyThreshold) {
-            currencyThreshold = await CurrencyThreshold.fromCode(currencyCode) as CurrencyThreshold
+            currencyThreshold = await CurrencyThreshold.fromCode(currencyCode)
           }
 
-          map = priceMap[currencyCode] = await fetchThresholdPrices(currencyThreshold)
+          map = priceMap[currencyCode] = await fetchThresholdPrices(
+            currencyThreshold
+          )
         } catch {
           continue
         }
@@ -64,12 +68,11 @@ async function checkPriceChanges() {
       const deviceTokens: string[] = []
       for (const device of devices) {
         const { tokenId } = device
-        if (typeof tokenId === 'string')
-          deviceTokens.push(tokenId)
+        if (typeof tokenId === 'string') deviceTokens.push(tokenId)
       }
 
       const userHourSettings = user.notifications.currencyCodes[currencyCode]
-      for (const [ hours, enabled ] of Object.entries(userHourSettings)) {
+      for (const [hours, enabled] of Object.entries(userHourSettings)) {
         if (enabled && map[hours]) {
           map[hours].deviceTokens.push(...deviceTokens)
           const set = new Set(map[hours].deviceTokens)
@@ -90,7 +93,7 @@ async function sendNotifications(priceMap: NotificationPriceMap) {
   for (const currencyCode in priceMap) {
     for (const hours in priceMap[currencyCode]) {
       const priceChange = priceMap[currencyCode][hours]
-      const direction = priceChange.priceChange > 0 ? 'up': 'down'
+      const direction = priceChange.priceChange > 0 ? 'up' : 'down'
       const symbol = priceChange.priceChange > 0 ? '+' : ''
       const time = Number(hours) === 1 ? '1 hour' : `${hours} hours`
 
@@ -103,9 +106,13 @@ async function sendNotifications(priceMap: NotificationPriceMap) {
         const start = i * 500
         const end = start + 500
         const tokens = priceChange.deviceTokens.slice(start, end)
-        const response = await manager.sendNotifications(title, body, tokens, data)
-          .catch((err) => console.log(JSON.stringify(err, null, 2)))
-        console.log('FCM notification response', JSON.stringify(response, null, 2))
+        const response = await manager
+          .sendNotifications(title, body, tokens, data)
+          .catch(err => console.log(JSON.stringify(err, null, 2)))
+        console.log(
+          'FCM notification response',
+          JSON.stringify(response, null, 2)
+        )
       }
     }
   }
@@ -116,15 +123,17 @@ interface IThresholdPricesResponse {
     price: number
     priceChange: number
     timestamp: number
-    deviceTokens: Array<string>
+    deviceTokens: string[]
   }
 }
 
 function sleep(ms = 5000) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promise<IThresholdPricesResponse> {
+async function fetchThresholdPrices(
+  currencyThreshold: CurrencyThreshold
+): Promise<IThresholdPricesResponse> {
   const response: IThresholdPricesResponse = {}
 
   const currencyCode = currencyThreshold._id
@@ -139,15 +148,12 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
   }
 
   for (const hours in currencyThreshold.thresholds) {
-    const hoursAgo = Date.now() - (Number(hours) * 60 * 60 * 1000)
-    let threshold = currencyThreshold.thresholds[hours]
+    const hoursAgo = Date.now() - Number(hours) * 60 * 60 * 1000
+    const threshold = currencyThreshold.thresholds[hours]
     let before
-    if (threshold.lastUpdated === 0)
-      before = hoursAgo
-    else if (hoursAgo > threshold.lastUpdated)
-      before = hoursAgo
-    else
-      before = threshold.lastUpdated
+    if (threshold.lastUpdated === 0) before = hoursAgo
+    else if (hoursAgo > threshold.lastUpdated) before = hoursAgo
+    else before = threshold.lastUpdated
 
     let priceBefore
     try {
@@ -157,7 +163,9 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
       continue
     }
 
-    const priceChange = parseFloat((100 * (price - priceBefore) / priceBefore).toFixed(2))
+    const priceChange = parseFloat(
+      ((100 * (price - priceBefore)) / priceBefore).toFixed(2)
+    )
     const today = Date.parse(new Date().toISOString())
     // @ts-expect-error
     const percent = HOURS_PERCENT_MAP[hours]
@@ -178,8 +186,8 @@ async function fetchThresholdPrices(currencyThreshold: CurrencyThreshold): Promi
       await currencyThreshold.save()
 
       // Set decimal place to 2 significant digits
-      let numSplit = price.toString().split('.')
-      let sigIndex = numSplit[1].search(/[1-9]/)
+      const numSplit = price.toString().split('.')
+      const sigIndex = numSplit[1].search(/[1-9]/)
       numSplit[1] = numSplit[1].substring(0, sigIndex + 2)
       const displayPrice = Number(numSplit.join('.'))
 
