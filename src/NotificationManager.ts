@@ -49,6 +49,6 @@ export class NotificationManager {
       tokens
     }
 
-    return await this.app.messaging().sendMulticast(message)
+    return this.app.messaging().sendMulticast(message)
   }
 }

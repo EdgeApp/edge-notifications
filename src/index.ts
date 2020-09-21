@@ -1,8 +1,10 @@
 import * as schedule from 'node-schedule'
 
-import { CurrencyThreshold, Device, User } from './models'
+import { CurrencyThreshold, User } from './models'
 import { NotificationManager } from './NotificationManager'
 import { getPrice } from './prices'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CONFIG = require('../serverConfig.json')
 
 const HOURS_PERCENT_MAP = {
@@ -23,6 +25,7 @@ interface NotificationPriceChange {
   deviceTokens: string[]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 schedule.scheduleJob(`*/${CONFIG.priceCheckInMinutes} * * * *`, run)
 
 let isRunning = false
@@ -35,6 +38,7 @@ async function run() {
 
   isRunning = false
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 run()
 
 async function checkPriceChanges() {
@@ -127,7 +131,7 @@ interface IThresholdPricesResponse {
   }
 }
 
-function sleep(ms = 5000) {
+async function sleep(ms = 5000): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 

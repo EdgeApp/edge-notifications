@@ -4,6 +4,7 @@ import * as Nano from 'nano'
 import { Base } from '.'
 import { Device } from './Device'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CONFIG = require('../../serverConfig.json')
 
 const nanoDb = Nano(CONFIG.dbFullpath)
