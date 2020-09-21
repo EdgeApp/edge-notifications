@@ -9,24 +9,24 @@ const CONFIG = require('../../serverConfig.json')
 const nanoDb = Nano(CONFIG.dbFullpath)
 const dbCurrencyThreshold = nanoDb.db.use('db_currency_thresholds')
 
-const IThresholds = asMap(
+const asThresholds = asMap(
   asObject({
     lastUpdated: asNumber,
     price: asNumber
   })
 )
 
-const ICurrencyThreshold = asObject({
-  thresholds: IThresholds
+const asCurrencyThreshold = asObject({
+  thresholds: asThresholds
 })
 
 export class CurrencyThreshold
   extends Base
-  implements ReturnType<typeof ICurrencyThreshold> {
+  implements ReturnType<typeof asCurrencyThreshold> {
   public static table = dbCurrencyThreshold
-  public static asType = ICurrencyThreshold
+  public static asType = asCurrencyThreshold
 
-  public thresholds: ReturnType<typeof IThresholds>
+  public thresholds: ReturnType<typeof asThresholds>
 
   // @ts-expect-error
   constructor(...args) {

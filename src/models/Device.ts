@@ -9,7 +9,7 @@ const CONFIG = require('../../serverConfig.json')
 const nanoDb = Nano(CONFIG.dbFullpath)
 const dbDevices = nanoDb.db.use('db_devices')
 
-const IDevice = asObject({
+const asDevice = asObject({
   appId: asString,
   tokenId: asOptional(asString),
   deviceDescription: asString,
@@ -18,9 +18,9 @@ const IDevice = asObject({
   edgeBuildNumber: asNumber
 })
 
-export class Device extends Base implements ReturnType<typeof IDevice> {
+export class Device extends Base implements ReturnType<typeof asDevice> {
   public static table = dbDevices
-  public static asType = IDevice
+  public static asType = asDevice
 
   public appId!: string
   public tokenId!: string

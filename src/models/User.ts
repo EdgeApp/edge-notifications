@@ -10,8 +10,8 @@ const CONFIG = require('../../serverConfig.json')
 const nanoDb = Nano(CONFIG.dbFullpath)
 const dbUserSettings = nanoDb.db.use('db_user_settings')
 
-const IUserDevices = asMap(asBoolean)
-const IUserNotifications = asObject({
+const asUserDevices = asMap(asBoolean)
+const asUserNotifications = asObject({
   enabled: asOptional(asBoolean),
   currencyCodes: asMap(
     asObject({
@@ -20,17 +20,17 @@ const IUserNotifications = asObject({
     })
   )
 })
-const IUser = asObject({
-  devices: IUserDevices,
-  notifications: IUserNotifications
+const asUser = asObject({
+  devices: asUserDevices,
+  notifications: asUserNotifications
 })
 
-export class User extends Base implements ReturnType<typeof IUser> {
+export class User extends Base implements ReturnType<typeof asUser> {
   public static table = dbUserSettings
-  public static asType = IUser
+  public static asType = asUser
 
-  public devices: ReturnType<typeof IUserDevices>
-  public notifications: ReturnType<typeof IUserNotifications>
+  public devices: ReturnType<typeof asUserDevices>
+  public notifications: ReturnType<typeof asUserNotifications>
 
   // @ts-expect-error
   constructor(...args) {
